@@ -1,36 +1,6 @@
 var http = require('http');
 
-var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/pos-unoesc');
-
-var db = mongoose.connection;
-
-db.on('error', function (err) {
-	console.log('Erro de conexao.', err);
-});
-
-db.on('open', function () {
- 	console.log('Conexão aberta.');
-});
-
-db.on('connected', function(err) {
-	console.log('Conectado');
-})
-
-var Schema = mongoose.Schema;
-
-var json_schema = {
-		name: {type: String, default: ''}
-	, description: {type: String, default: ''}
-	,	alcohol: { type: Number,  min: 0}
-	,	price: { type: Number, min: 0}
-	,	category: { type: String, default: ''}
-	,	created_at: { type: Date, default: Date.now}
-}
-
-var BeerSchema = new Schema(json_schema);
-
-var Beer = mongoose.model('Beer', BeerSchema);
+var Model = require('./model');
 
 var Controller = {
 	create: function (req, res){
@@ -41,7 +11,7 @@ var Controller = {
 				,	category: 'pilsen'
 			}
 
-			var model = Beer(dados);
+			var model = Model(dados);
 			var msg = '';
 
 			model.save(function(err, data){
@@ -57,7 +27,7 @@ var Controller = {
 	,	retrieve: function (req, res){
 			var query = {};
 
-			Beer.find (query, function(err, data) {
+			Model.find (query, function(err, data) {
 				if (err) {
 					console.log('Erro: ', err);
 					msg = 'Erro: ' + err;
@@ -82,7 +52,7 @@ var Controller = {
 				multi: false
 			};
 
-  		Beer.update(query, mod, optional, function(err, data) {
+  		Model.update(query, mod, optional, function(err, data) {
 				if (err) {
 					console.log('Erro: ', err);
 					msg = 'Erro: ' + err;
@@ -95,7 +65,7 @@ var Controller = {
 	, delete: function (req, res){
 			var query = {name: /brahma/i};
 
-			Beer.remove(query, function(err, data) {
+			Model.remove(query, function(err, data) {
 				if (err) {
 					console.log('Erro: ', err);
 					msg = 'Erro: ' + err;
@@ -125,7 +95,6 @@ http.createServer(function (req, res) {
   	case '/api/beers/update':
   		Controller.update(req, res);
   		
-
   	case '/api/beers/delete':
   		Controller.delete(req, res);
 
